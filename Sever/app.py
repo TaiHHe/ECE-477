@@ -15,4 +15,5 @@ def entry():
 
 if __name__ == '__main__':
     # For pycharm, changing port and address must be done in app configuration.
+    # Additional options: --host=0.0.0.0 --port=9090
     app.run()

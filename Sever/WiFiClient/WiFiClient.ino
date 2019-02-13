@@ -7,15 +7,15 @@
 #include <ESP8266HTTPClient.h>
 
 #ifndef STASSID
-#define STASSID "TP-LINK_946"
-#define STAPSK  "hao970920"
+#define STASSID "XMIXERMAX"
+#define STAPSK  "Team19@ECE477"
 #endif
 
 const char* ssid     = STASSID;
 const char* password = STAPSK;
 
-const char* host = "192.168.0.107";
-const uint16_t port = 8080;
+const char* host = "192.168.1.100";
+const uint16_t port = 9090;
 
 void setup() {
   Serial.begin(115200);
