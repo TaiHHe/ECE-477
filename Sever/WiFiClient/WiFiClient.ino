@@ -90,12 +90,14 @@ void loop() {
   // Read all the lines of the reply from server and print them to Serial
   Serial.println("receiving from remote server");
   // not testing 'client.connected()' since we do not need to send data here
-  String line = client.readStringUntil('\r');
+  //String line = client.readStringUntil('\n');
   // Wait for server to send back data. Keep refreshing the connection to sever due to the sever keeps track on new connection.
-  while(line == ""){
-    client.connect(host,port);
-    line = client.readStringUntil('\r');
+  //while(line == ""){
+    //client.connect(host,port);
+  while(client.available() > 0){
+    line = client.readStringUntil('\n');
   }
+  //Serial.write(line);
   Serial.println(line);
   Serial.println("Done!");
   // Close the connection

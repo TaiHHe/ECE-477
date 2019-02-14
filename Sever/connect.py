@@ -17,7 +17,7 @@ def connect_to_esp8266(mySocket):
         print("New connection from:")
         print("IP: " + address[0])
         print("port: " + str(address[1]))
-        if ('19' in address[0]):
+        if ('192.168.0.19' in address[0]):
             print("esp8266 connected")
             return client
         else:
