@@ -53,6 +53,7 @@ void loop() {
       Serial.println();
       Serial.print(line);
       Serial.println();
+      Serial.println();
       Serial.println("Done!");
     }
     else{
@@ -60,6 +61,7 @@ void loop() {
     }    
     // Close the connection
     Serial.println("Closing connection.");
+    Serial.println();
     client.stop();
     delay(5000); // execute once every 5s, don't flood remote service
   }
