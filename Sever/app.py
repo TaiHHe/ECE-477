@@ -6,9 +6,9 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST', 'PUT'])
 def entry():
     if request.method == "POST" :
-        msg = request.form.get("message")
         mySocket = listen_port()
         client = connect_to_esp8266(mySocket)
+        msg = request.form.get("message")
         send_to_esp8266(msg, client)
     return render_template('entry.html')
 

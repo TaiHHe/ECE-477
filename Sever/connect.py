@@ -29,23 +29,4 @@ def send_to_esp8266(msg, client):
         print("message: '" + msg + "' sent")
     except:
         client.send(b"")
-
-# def send_to_esp8266(msg, client):
-#     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#     host = socket.gethostname()
-#     port = 8080
-#     mySocket.bind((host, port))
-#     mySocket.listen(10)
-#     while True:
-#         print("Waiting for client connection....")
-#         client, address = mySocket.accept()
-#         print("New connection from:")
-#         print("IP: " + address[0])
-#         print("port: " + str(address[1]))
-#         if ('116' in address[0]):
-#             client.send(msg.encode())
-#             print("message: '" + msg + "' send to " + str(address[0]))
-#             break
-#         else:
-#             continue
-
+        print("Empty string sent")

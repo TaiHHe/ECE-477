@@ -1,8 +1,3 @@
-/*
-    This sketch establishes a TCP connection to a "quote of the day" service.
-    It sends a "hello" message, and then prints received data.
-*/
-
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
@@ -20,8 +15,6 @@ const uint16_t port = 9090;
 void setup() {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
-  // We start by connecting to a WiFi network
-
   Serial.println();
   Serial.println();
   Serial.print("Connecting to ");
@@ -37,7 +30,6 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
@@ -51,27 +43,31 @@ void loop() {
   Serial.print(':');
   Serial.println(port);
 
+  // Use WiFiClient class to create TCP connections
   WiFiClient client;
-  if (client.connect(host, port))
-  {
-    Serial.println("Connected!");
-    
-    while (client.connected() || client.available())
-    {
-      if (client.available())
-      {
-        Serial.println("Receiving from sever ...");
-        String line = client.readStringUntil('\n');
-        Serial.println(line);
-      }
+  if(client.connect(host, port)){
+    Serial.println("Connected to server!");
+    Serial.println("Receiving from remote server ...");
+    String line = client.readStringUntil('\n');
+    if (line != ""){
+      Serial.println();
+      Serial.print(line);
+      Serial.println();
+      Serial.println("Done!");
     }
+    else{
+      Serial.println("No message Received.");
+    }    
+    // Close the connection
+    Serial.println("Closing connection.");
     client.stop();
-    Serial.println("\nDisconnected");
+    delay(5000); // execute once every 5s, don't flood remote service
   }
-  else
-  {
-    Serial.println("connection failed!]");
-    client.stop();
+  else{
+    Serial.println("Connection failed.");
+    delay(5000);
+    return;
   }
-  delay(1000); // execute once every 1s, don't flood remote service
+
+
 }
