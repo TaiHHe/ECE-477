@@ -76,6 +76,9 @@ extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart3;
 /* USER CODE BEGIN EV */
 extern int timeout;
+extern int status;
+extern int overflow;
+extern int tim;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -224,10 +227,21 @@ void TIM2_IRQHandler(void)
 	TIM2 -> SR &= 0xFFFFFFFE;
 	count++;
 
-	if ((timeout == 0) && (count >= 3000)) { //30s
-		timeout = 1;
-	} else if (timeout == 1) {
+	if (status == STATUS_INIT) {
+		if ((timeout == 0) && (count >= 3000)) { //30s
+			timeout = 1;
+		} else if (timeout == 1) {
+			count = 0;
+		}
+	} else if (status == STATUS_IDLE) {
 		count = 0;
+	} else if (status == STATUS_MIXING) {
+		//Check ADC value, change the value of overflow to 1 if needed, and then break
+		if (count >= tim) {
+			//Finished mixing
+			count = 0;
+			timeout = 1;
+		}
 	}
 
   /* USER CODE END TIM2_IRQn 0 */

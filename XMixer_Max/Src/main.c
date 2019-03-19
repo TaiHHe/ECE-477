@@ -78,6 +78,7 @@ uint8_t initMsg[] = "init\n";
 uint8_t errorMsg[] = "error\n";
 uint8_t startMsg[] = "start\n";
 uint8_t doneMsg[] = "done\n";
+uint8_t ofMsg[] = "overflow\n";
 
 //Test msgs
 uint8_t welcomeMessage[] = "Thank you for choosing XMixer Max!\n";
@@ -99,9 +100,10 @@ int numBufIdx = 0;
 int i = 0;
 int LF = 0;
 int CurIdx;
-int status = 0; //0 = no connection, 1 = start, 2 = no WiFi
-int order = 0; //order received?
-int timeout = 0;
+int status = STATUS_INIT;
+int timeout = 0; //2 usages
+int overflow = 0;
+int tim; //working time passed to TIM2 handler
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -113,7 +115,7 @@ static void MX_USART3_UART_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
-
+void Drink_Transfer(int sol, int time);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -191,13 +193,13 @@ int main(void)
 		  HAL_UART_Receive_IT(&huart2, &pData, 1);
 		  if (buffer == "success\n") {
 			  //Connection established. Start working.
-			  status = 1;
+			  status = STATUS_IDLE;
 			  lcd_send_string("plPlease select");
 			  lcd_send_cmd(0xc0);
 			  lcd_send_string("drinks!");
 		  } else if (buffer == "fail\n") {
 			  //Connection failed. Reconnecting.
-			  status = 2;
+			  status = STATUS_ERROR;
 			  lcd_send_string("plNo WiFi found");
 			  lcd_send_cmd(0xc0);
 			  lcd_send_string("Reconnecting...");
@@ -207,7 +209,7 @@ int main(void)
 		  if (HAL_GPIO_ReadPin(Button_Restart_GPIO_Port, Button_Restart_Pin) == 1) {
 			  //Button pressed. Start over.
 			  timeout = 0;
-			  status = 0;
+			  status = STATUS_INIT;
 			  HAL_GPIO_WritePin(LED_Error_GPIO_Port, LED_Error_Pin, GPIO_PIN_RESET);
 			  lcd_send_cmd(0x01);
 			  lcd_send_cmd(0x02);
@@ -217,18 +219,20 @@ int main(void)
 			  HAL_GPIO_WritePin(LED_Error_GPIO_Port, LED_Error_Pin, GPIO_PIN_SET);
 			  lcd_send_cmd(0x01);
 			  lcd_send_cmd(0x02);
-			  if (status == 0) {
+			  if (status == STATUS_INIT) {
 				  lcd_send_string("plWiFi module");
 				  lcd_send_cmd(0xc0);
 				  lcd_send_string("malfunctioning");
-			  } else if (status == 2) {
+			  } else if (status == STATUS_ERROR) {
 				  lcd_send_string("plPlease check");
 				  lcd_send_cmd(0xc0);
 				  lcd_send_string("WiFi signal");
 			  }
 		  }
 	  }
-   } while (status != 1);
+   } while (status != STATUS_IDLE);
+
+  timeout = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -280,7 +284,7 @@ int main(void)
 			  lcd_send_string("plOrder received");
 			  lcd_send_cmd(0xc0);
 			  lcd_send_string("Mixing");
-			  order = 1;
+			  status = STATUS_MIXING;
 			  HAL_UART_Transmit(&huart2, startMsg, sizeof(startMsg), 100);
 		  }
 		  //For now, assume no other information would be received, and the process would not be interrupted.
@@ -292,43 +296,47 @@ int main(void)
 		  HAL_UART_Receive_IT(&huart2, &pData, 1);
 	  }
 
-	  if (order == 1) {
+	  if (status == STATUS_MIXING) {
 		  //Start mixing.
 		  //Need to calculate the time first, fill them in Time1-4
 		  HAL_GPIO_WritePin(LED_Working_GPIO_Port, LED_Working_Pin, GPIO_PIN_SET);
-		  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_SET); //As PC13 in the pump test, I am not sure what it is for (Relay?). Will change the name later.
+		  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_SET); //Turn on the relay
 		  HAL_GPIO_WritePin(Pump_Power_GPIO_Port, Pump_Power_Pin, GPIO_PIN_SET); //Turn on the pump, as PC10 in the pump test
-		  HAL_GPIO_WritePin(Solenoid_1_GPIO_Port, Solenoid_1_Pin, GPIO_PIN_SET); //Open solenoid 1
-		  HAL_Delay(Time1);
-		  HAL_GPIO_WritePin(Solenoid_1_GPIO_Port, Solenoid_1_Pin, GPIO_PIN_RESET); //Close solenoid 1
-		  HAL_Delay(1500); //Wait for a little bit: 1.5s
-		  HAL_GPIO_WritePin(Solenoid_2_GPIO_Port, Solenoid_2_Pin, GPIO_PIN_SET); //Open solenoid 2
-		  HAL_Delay(Time2);
-		  HAL_GPIO_WritePin(Solenoid_2_GPIO_Port, Solenoid_2_Pin, GPIO_PIN_RESET); //Close solenoid 2
-		  HAL_Delay(1500); //Wait for a little bit: 1.5s
-		  HAL_GPIO_WritePin(Solenoid_3_GPIO_Port, Solenoid_3_Pin, GPIO_PIN_SET); //Open solenoid 3
-		  HAL_Delay(Time3);
-		  HAL_GPIO_WritePin(Solenoid_3_GPIO_Port, Solenoid_3_Pin, GPIO_PIN_RESET); //Close solenoid 3
-		  HAL_Delay(1500); //Wait for a little bit: 1.5s
-		  HAL_GPIO_WritePin(Solenoid_4_GPIO_Port, Solenoid_4_Pin, GPIO_PIN_SET); //Open solenoid 4
-		  HAL_Delay(Time4);
-		  HAL_GPIO_WritePin(Solenoid_4_GPIO_Port, Solenoid_4_Pin, GPIO_PIN_RESET); //Close solenoid 4
-		  HAL_Delay(1500); //Wait for a little bit: 1.5s
-		  HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_SET); //Open solenoid air
-		  HAL_Delay(3000); //Should be a fix value, assume it is 3s for now
-		  HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_RESET); //Close solenoid air
-		  HAL_Delay(1500); //Wait for a little bit: 1.5s
+
+		  Drink_Transfer(1, Time1);
+		  if (!overflow) {
+			  Drink_Transfer(2, Time2);
+			  if (!overflow) {
+				  Drink_Transfer(3, Time3);
+				  if (!overflow) {
+					  Drink_Transfer(4, Time4);
+				  }
+			  }
+		  }
+		  Drink_Transfer(5, 3000); //Air
+
 		  HAL_GPIO_WritePin(Pump_Power_GPIO_Port, Pump_Power_Pin, GPIO_PIN_RESET); //Turn off the pump
-		  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_RESET); //Turn ??? off
+		  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_RESET); //Turn off the relay
+		  status = STATUS_IDLE;
+
 		  //Update LED, LCD and the web site
 		  HAL_GPIO_WritePin(LED_Working_GPIO_Port, LED_Working_Pin, GPIO_PIN_RESET);
-		  lcd_send_cmd(0x01);
-		  lcd_send_cmd(0x02);
-		  lcd_send_string("plOrder");
-		  lcd_send_cmd(0xc0);
-		  lcd_send_string("completed!");
-		  HAL_UART_Transmit(&huart2, doneMsg, sizeof(doneMsg), 100);
-		  order = 0;
+		  if (!overflow) {
+			  lcd_send_cmd(0x01);
+			  lcd_send_cmd(0x02);
+			  lcd_send_string("plOrder");
+			  lcd_send_cmd(0xc0);
+			  lcd_send_string("completed!");
+			  HAL_UART_Transmit(&huart2, doneMsg, sizeof(doneMsg), 100);
+		  } else {
+			  lcd_send_cmd(0x01);
+			  lcd_send_cmd(0x02);
+			  lcd_send_string("plAlmost full!");
+			  lcd_send_cmd(0xc0);
+			  lcd_send_string("Stop mixing!");
+			  HAL_UART_Transmit(&huart2, ofMsg, sizeof(ofMsg), 100);
+			  overflow = 0;
+		  }
 	  }
   }
   /* USER CODE END 3 */
@@ -628,6 +636,49 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void Drink_Transfer(int sol, int time) {
+	GPIO_TypeDef *port;
+	uint16_t pin;
+	switch (sol) {
+	case 1:
+		port = Solenoid_1_GPIO_Port;
+		pin = Solenoid_1_Pin;
+		break;
+	case 2:
+		port = Solenoid_2_GPIO_Port;
+		pin = Solenoid_2_Pin;
+		break;
+	case 3:
+		port = Solenoid_3_GPIO_Port;
+		pin = Solenoid_3_Pin;
+		break;
+	case 4:
+		port = Solenoid_4_GPIO_Port;
+		pin = Solenoid_4_Pin;
+		break;
+	case 5:
+		port = Solenoid_Air_GPIO_Port;
+		pin = Solenoid_Air_Pin;
+		break;
+	default:
+		port = Solenoid_Air_GPIO_Port;
+		pin = Solenoid_Air_Pin;
+		break;
+	}
+
+	tim = time;
+	HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET); //Open solenoid
+	status = STATUS_MIXING;
+	while (!timeout) {
+		if (overflow) {
+			break;
+		}
+	}
+	HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET); //Close solenoid
+	status = STATUS_IDLE;
+	HAL_Delay(1500); //Wait for a little bit: 1.5s
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if (pData == '\r') {

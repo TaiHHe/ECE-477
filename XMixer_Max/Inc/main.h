@@ -104,6 +104,11 @@ void Error_Handler(void);
 #define Solenoid_Air_GPIO_Port GPIOD
 /* USER CODE BEGIN Private defines */
 
+#define STATUS_INIT 0
+#define STATUS_IDLE 1
+#define STATUS_MIXING 2
+#define STATUS_ERROR 3
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
