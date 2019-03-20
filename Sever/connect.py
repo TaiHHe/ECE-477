@@ -2,9 +2,9 @@ import socket
 
 def listen_port():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 10)
     host = socket.gethostname()
-    port = 9090
+    port = 9999
     mySocket.bind((host, port))
     mySocket.listen(10)
     print("Start listening")
@@ -14,14 +14,16 @@ def connect_to_esp8266(mySocket):
     while True:
         print("Waiting for client connection....")
         client, address = mySocket.accept()
+        msg = client.recv(1024)
         print("New connection from:")
         print("IP: " + address[0])
         print("port: " + str(address[1]))
-        if ('192.168.1.19' in address[0]):
-            print("esp8266 connected")
-            return client
-        else:
-            continue
+        # if ('192.168.1.19' in address[0]):
+        #if("esp8266" in msg):
+        print("esp8266 connected")
+        return client
+        #else:
+         #   continue
 
 def send_to_esp8266(msg, client):
     try:

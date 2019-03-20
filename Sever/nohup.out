@@ -1,0 +1,50 @@
+ * Serving Flask app "app" (lazy loading)
+ * Environment: production
+   WARNING: Do not use the development server in a production environment.
+   Use a production WSGI server instead.
+ * Debug mode: off
+ * Running on http://0.0.0.0:9090/ (Press CTRL+C to quit)
+98.223.101.25 - - [02/Mar/2019 00:39:50] "GET /mixer HTTP/1.1" 200 -
+98.223.101.25 - - [02/Mar/2019 00:42:05] "GET /mixer HTTP/1.1" 200 -
+[2019-03-02 00:42:22,100] ERROR in app: Exception on /mixer [POST]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python3.6/dist-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "app.py", line 18, in mixer
+    mySocket = listen_port()
+  File "/root/ECE-477/Sever/connect.py", line 8, in listen_port
+    mySocket.bind((host, port))
+OSError: [Errno 98] Address already in use
+98.223.101.25 - - [02/Mar/2019 00:42:22] "POST /mixer HTTP/1.1" 500 -
+98.223.101.25 - - [02/Mar/2019 00:42:27] "GET /mixer HTTP/1.1" 200 -
+[2019-03-02 00:42:29,578] ERROR in app: Exception on /mixer [POST]
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/usr/local/lib/python3.6/dist-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/local/lib/python3.6/dist-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "app.py", line 18, in mixer
+    mySocket = listen_port()
+  File "/root/ECE-477/Sever/connect.py", line 8, in listen_port
+    mySocket.bind((host, port))
+OSError: [Errno 98] Address already in use
+98.223.101.25 - - [02/Mar/2019 00:42:29] "POST /mixer HTTP/1.1" 500 -
+98.223.101.25 - - [02/Mar/2019 00:42:30] "GET /mixer HTTP/1.1" 200 -
