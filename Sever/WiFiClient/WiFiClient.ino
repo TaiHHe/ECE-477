@@ -14,7 +14,8 @@
 const char* ssid     = STASSID;
 const char* password = STAPSK;
 
-const char* host = "67.209.189.144";
+// const char* host = "67.209.189.144";
+const char *host = "192.168.1.100";
 const uint16_t port = 9090;
 
 void setup() {
@@ -36,7 +37,7 @@ void setup() {
 //    Serial.print(".");
   }
 //  Serial.println("");
-  Serial.println("WiFi connected");
+//   Serial.println("WiFi connected");
 //  Serial.println("IP address: ");
 //  Serial.println(WiFi.localIP());
 }
@@ -62,7 +63,7 @@ void loop() {
 //      Serial.println("Done!");
     }
     else{
-//      Serial.println("No message Received.");
+      Serial.print("1,50.2,50.3,100.4,100.done\n");
     }    
     // Close the connection
 //    Serial.println("Closing connection.");
