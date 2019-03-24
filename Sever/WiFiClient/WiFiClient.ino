@@ -14,8 +14,8 @@
 const char* ssid     = STASSID;
 const char* password = STAPSK;
 
-const char* host = "192.168.1.100";
-const uint16_t port = 9090;
+const char* host = "67.209.189.144";
+const uint16_t port = 9999;
 
 void setup() {
   Serial.begin(115200);
@@ -23,7 +23,7 @@ void setup() {
 //  Serial.println();
 //  Serial.println();
 //  Serial.print("Connecting to ");
-//  Serial.println(ssid);
+//  Serial.println(ssid);\
 
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
