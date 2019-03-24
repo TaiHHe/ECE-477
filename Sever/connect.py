@@ -4,7 +4,7 @@ def listen_port():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 10)
     host = socket.gethostname()
-    port = 9999
+    port = 9090
     mySocket.bind((host, port))
     mySocket.listen(10)
     print("Start listening")

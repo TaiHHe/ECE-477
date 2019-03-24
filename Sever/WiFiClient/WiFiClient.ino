@@ -15,7 +15,7 @@ const char* ssid     = STASSID;
 const char* password = STAPSK;
 
 const char* host = "67.209.189.144";
-const uint16_t port = 9999;
+const uint16_t port = 9090;
 
 void setup() {
   Serial.begin(115200);
