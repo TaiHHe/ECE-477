@@ -116,6 +116,8 @@ static void MX_TIM2_Init(void);
 static void MX_ADC1_Init(void);
 /* USER CODE BEGIN PFP */
 void Drink_Transfer(int sol, int time);
+void Timer_Enable();
+void Timer_Disable();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -135,10 +137,10 @@ int main(void)
 	int Vol3;
 	int Vol4;
 	int VolDel;
-	int Time1 = 0;
-	int Time2 = 0;
-	int Time3 = 0;
-	int Time4 = 0;
+	int Time1;
+	int Time2;
+	int Time3;
+	int Time4;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -169,6 +171,7 @@ int main(void)
   // System starts. Initialize LCD and UAR, turn a green LED to show the status. Wait for Internet connection.
   // Send msg to ESP first and then waiting for reply to check the connection
   // Software is responsible for verifying bidirectional connection with the server
+  i = 0;
   lcd_init();
   lcd_send_cmd(0x01);
   lcd_send_cmd(0x02);
@@ -184,7 +187,8 @@ int main(void)
   lcd_send_string("nect to Internet");
   HAL_UART_Receive_IT(&huart2, &pData, 1);
   HAL_UART_Transmit(&huart2, initMsg, sizeof(initMsg), 100);
-  do {
+  ADC1 -> CR2 |= ADC_CR2_ADON;
+  /*do {
 	  if ((LF == 1) && (timeout == 0)) {
 		  //Keep trying as long as 30 seconds have not passed since last restart.
 		  LF = 0;
@@ -231,7 +235,7 @@ int main(void)
 		  }
 	  }
    } while (status != STATUS_IDLE);
-
+*/
   timeout = 0;
   /* USER CODE END 2 */
 
@@ -245,6 +249,7 @@ int main(void)
 	  //Check if any information is received.
 	  if (LF == 1) {
 		  LF = 0;
+		  i = 0;
 		  if ((buffer[0] == 49) || (buffer[0] == 10)) { // /n or 1
 			  //Order received, parse information
 			  CurIdx = 1;
@@ -284,7 +289,7 @@ int main(void)
 			  lcd_send_string("plOrder received");
 			  lcd_send_cmd(0xc0);
 			  lcd_send_string("Mixing");
-			  status = STATUS_MIXING;
+			  status = STATUS_READY;
 			  HAL_UART_Transmit(&huart2, startMsg, sizeof(startMsg), 100);
 		  }
 		  //For now, assume no other information would be received, and the process would not be interrupted.
@@ -296,11 +301,15 @@ int main(void)
 		  HAL_UART_Receive_IT(&huart2, &pData, 1);
 	  }
 
-	  if (status == STATUS_MIXING) {
-		  //Start mixing.
-		  //Need to calculate the time first, fill them in Time1-4
+	  if (status == STATUS_READY) {
+		  //Start mixing, need to calculate the time with the speed 7.5 ml/s
+		  Timer_Enable();
+		  Time1 = Vol1/SPEED;
+		  Time2 = Vol2/SPEED;
+		  Time3 = Vol3/SPEED;
+		  Time4 = Vol4/SPEED;
 		  HAL_GPIO_WritePin(LED_Working_GPIO_Port, LED_Working_Pin, GPIO_PIN_SET);
-		  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_SET); //Turn on the relay
+		  HAL_GPIO_WritePin(Relay_Power_GPIO_Port, Relay_Power_Pin, GPIO_PIN_SET); //Turn on the relay
 		  HAL_GPIO_WritePin(Pump_Power_GPIO_Port, Pump_Power_Pin, GPIO_PIN_SET); //Turn on the pump, as PC10 in the pump test
 
 		  Drink_Transfer(1, Time1);
@@ -313,10 +322,9 @@ int main(void)
 				  }
 			  }
 		  }
-		  Drink_Transfer(5, 3000); //Air
 
 		  HAL_GPIO_WritePin(Pump_Power_GPIO_Port, Pump_Power_Pin, GPIO_PIN_RESET); //Turn off the pump
-		  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_RESET); //Turn off the relay
+		  HAL_GPIO_WritePin(Relay_Power_GPIO_Port, Relay_Power_Pin, GPIO_PIN_RESET); //Turn off the relay
 		  status = STATUS_IDLE;
 
 		  //Update LED, LCD and the web site
@@ -337,6 +345,7 @@ int main(void)
 			  HAL_UART_Transmit(&huart2, ofMsg, sizeof(ofMsg), 100);
 			  overflow = 0;
 		  }
+		  Timer_Disable();
 	  }
   }
   /* USER CODE END 3 */
@@ -489,7 +498,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 41999;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 199999;
+  htim2.Init.Period = 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
   {
@@ -595,39 +604,39 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(Pump_idk_GPIO_Port, Pump_idk_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, LED_Power_Pin|LED_Error_Pin|LED_Working_Pin|GPIO_PIN_7, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LED_Power_Pin|LED_Error_Pin|LED_Working_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1|Boot1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, Pump_Power_Pin|Solenoid_1_Pin|Solenoid_2_Pin|Solenoid_3_Pin 
-                          |Solenoid_4_Pin|Solenoid_Air_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, Relay_Power_Pin|Pump_Power_Pin|Solenoid_1_Pin|Solenoid_2_Pin 
+                          |Solenoid_3_Pin|Solenoid_4_Pin|Solenoid_Air_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : Pump_idk_Pin */
-  GPIO_InitStruct.Pin = Pump_idk_Pin;
+  /*Configure GPIO pins : LED_Power_Pin LED_Error_Pin LED_Working_Pin PA7 */
+  GPIO_InitStruct.Pin = LED_Power_Pin|LED_Error_Pin|LED_Working_Pin|GPIO_PIN_7;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Pump_idk_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LED_Power_Pin LED_Error_Pin LED_Working_Pin */
-  GPIO_InitStruct.Pin = LED_Power_Pin|LED_Error_Pin|LED_Working_Pin;
+  /*Configure GPIO pins : PB0 PB1 Boot1_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|Boot1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Button_Reset_Pin Button_Restart_Pin */
-  GPIO_InitStruct.Pin = Button_Reset_Pin|Button_Restart_Pin;
+  /*Configure GPIO pins : Button_Stop_Pin Button_Restart_Pin PC12 */
+  GPIO_InitStruct.Pin = Button_Stop_Pin|Button_Restart_Pin|GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : Pump_Power_Pin Solenoid_1_Pin Solenoid_2_Pin Solenoid_3_Pin 
-                           Solenoid_4_Pin Solenoid_Air_Pin */
-  GPIO_InitStruct.Pin = Pump_Power_Pin|Solenoid_1_Pin|Solenoid_2_Pin|Solenoid_3_Pin 
-                          |Solenoid_4_Pin|Solenoid_Air_Pin;
+  /*Configure GPIO pins : Relay_Power_Pin Pump_Power_Pin Solenoid_1_Pin Solenoid_2_Pin 
+                           Solenoid_3_Pin Solenoid_4_Pin Solenoid_Air_Pin */
+  GPIO_InitStruct.Pin = Relay_Power_Pin|Pump_Power_Pin|Solenoid_1_Pin|Solenoid_2_Pin 
+                          |Solenoid_3_Pin|Solenoid_4_Pin|Solenoid_Air_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -636,6 +645,18 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void Timer_Enable() {
+	TIM2->DIER |= 0x0001;
+	TIM2->CR1 |= TIM_CR1_CEN;
+	NVIC->ISER[0] |= 0x10000000;
+}
+
+void Timer_Disable() {
+	TIM2->DIER &= 0xFFFE;
+	TIM2->CR1 &= !TIM_CR1_CEN;
+	NVIC->ISER[0] &= 0xEFFFFFFF;
+}
+
 void Drink_Transfer(int sol, int time) {
 	GPIO_TypeDef *port;
 	uint16_t pin;
@@ -669,19 +690,24 @@ void Drink_Transfer(int sol, int time) {
 	tim = time;
 	HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET); //Open solenoid
 	status = STATUS_MIXING;
-	while (!timeout) {
+	while (timeout == 0) {
 		if (overflow) {
 			break;
 		}
 	}
+	timeout = 0;
 	HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET); //Close solenoid
-	status = STATUS_IDLE;
-	HAL_Delay(1500); //Wait for a little bit: 1.5s
+	HAL_Delay(1000); //Wait for a little bit: 1.5s
+	HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_SET); //Open solenoid Air
+	HAL_Delay(3000);
+	HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_RESET); //Open solenoid Air
+	status = STATUS_READY;
+	HAL_Delay(1000); //Wait for a little bit: 1.5s
 }
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (pData == '\r') {
+	if (pData == '\n') {
 		i--;
 		LF = 1;
 	} else {

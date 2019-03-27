@@ -78,18 +78,20 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define Pump_idk_Pin GPIO_PIN_5
-#define Pump_idk_GPIO_Port GPIOA
-#define LED_Power_Pin GPIO_PIN_0
-#define LED_Power_GPIO_Port GPIOB
-#define LED_Error_Pin GPIO_PIN_1
-#define LED_Error_GPIO_Port GPIOB
-#define LED_Working_Pin GPIO_PIN_2
-#define LED_Working_GPIO_Port GPIOB
-#define Button_Reset_Pin GPIO_PIN_10
-#define Button_Reset_GPIO_Port GPIOC
+#define LED_Power_Pin GPIO_PIN_4
+#define LED_Power_GPIO_Port GPIOA
+#define LED_Error_Pin GPIO_PIN_5
+#define LED_Error_GPIO_Port GPIOA
+#define LED_Working_Pin GPIO_PIN_6
+#define LED_Working_GPIO_Port GPIOA
+#define Boot1_Pin GPIO_PIN_2
+#define Boot1_GPIO_Port GPIOB
+#define Button_Stop_Pin GPIO_PIN_10
+#define Button_Stop_GPIO_Port GPIOC
 #define Button_Restart_Pin GPIO_PIN_11
 #define Button_Restart_GPIO_Port GPIOC
+#define Relay_Power_Pin GPIO_PIN_0
+#define Relay_Power_GPIO_Port GPIOD
 #define Pump_Power_Pin GPIO_PIN_1
 #define Pump_Power_GPIO_Port GPIOD
 #define Solenoid_1_Pin GPIO_PIN_2
@@ -107,7 +109,12 @@ void Error_Handler(void);
 #define STATUS_INIT 0
 #define STATUS_IDLE 1
 #define STATUS_MIXING 2
-#define STATUS_ERROR 3
+#define STATUS_READY 3
+#define STATUS_ERROR 4
+
+#define SPEED 0.0075
+
+#define WEIGHT 5000
 
 /* USER CODE END Private defines */
 

@@ -58,6 +58,7 @@
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN PV */
 int count = 0;
+int read = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -233,11 +234,17 @@ void TIM2_IRQHandler(void)
 		} else if (timeout == 1) {
 			count = 0;
 		}
-	} else if (status == STATUS_IDLE) {
+	} else if (status == STATUS_READY) {
 		count = 0;
 	} else if (status == STATUS_MIXING) {
 		//Check ADC value, change the value of overflow to 1 if needed, and then break
-		if (count >= tim) {
+		ADC1 -> CR2 |= ADC_CR2_SWSTART;
+		while((ADC1 -> SR & ADC_SR_EOC) == 0);
+		read = ADC1 -> DR;
+		if (read > WEIGHT) {
+			count = 0;
+			overflow = 1;
+		} else if (count >= tim) {
 			//Finished mixing
 			count = 0;
 			timeout = 1;
