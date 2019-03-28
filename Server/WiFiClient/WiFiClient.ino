@@ -42,6 +42,7 @@ void setup() {
 //  Serial.println(WiFi.localIP());
 }
 
+/*
 void loop() {
   digitalWrite(LED_BUILTIN, LOW);  // Turn the LED on by making the voltage LOW
 //  Serial.print("Connecting to ");
@@ -76,6 +77,11 @@ void loop() {
     delay(5000);
     return;
   }
-
-
 }
+*/
+
+void loop(){
+  Serial.print("1,50.2,50.3,100.4,100.done\n");
+  delay(5000);
+}
+
