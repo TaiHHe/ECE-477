@@ -11,7 +11,7 @@ const char* password = STAPSK;
 
 //const char* host = "192.168.0.100";
 const char* host = "67.209.189.144";
-const uint16_t port = 9090;
+const uint16_t port = 9999;
 
 void setup() {
   Serial.begin(115200);
@@ -49,17 +49,19 @@ void loop() {
   if(client.connect(host, port)){
     Serial.println("Connected to server!");
     Serial.println("Receiving from remote server ...");
-    String line = client.readStringUntil('\n');
-    if (line != ""){
-      Serial.println();
-      Serial.print(line);
-      Serial.println();
-      Serial.println();
-      Serial.println("Done!");
+    String line = "";
+    while (true){
+      line = client.readStringUntil('\n');
+      if(line != ""){
+        Serial.println();
+        Serial.print(line);
+        Serial.println();
+        Serial.println();
+        Serial.println("Done!");
+        break;
+      }
+      delay(5000);
     }
-    else{
-      Serial.println("No message Received.");
-    }    
     // Close the connection
     Serial.println("Closing connection.");
     Serial.println();
