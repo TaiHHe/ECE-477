@@ -36,11 +36,11 @@ if __name__ == "__main__":
     client = connect_to_esp8266(mySocket)
     while True:
         try:
-            with open("/log/temp.txt", "r") as f:
+            with open("log.txt", "r") as f:
                 msg = f.readlines()[0]
-            if(msg != "")
+            if(msg != ""):
                 send_to_esp8266(msg, client)
-                with open("/log/temp.txt", w) as f:
+                with open("log.txt", "w") as f:
                     pass
         except:
             continue
