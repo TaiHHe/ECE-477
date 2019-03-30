@@ -3,8 +3,9 @@ import socket
 def listen_port():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    host = socket.gethostname()
-    port = 9090
+    # host = socket.gethostname()
+    host = "67.209.189.144"
+    port = 9999
     mySocket.bind((host, port))
     mySocket.listen(10)
     print("Start listening")
@@ -33,3 +34,7 @@ def send_to_esp8266(msg, client):
     except:
         client.send(b"")
         print("Empty string sent")
+
+if __name__ == "__main__":
+    mySocket = listen_port()
+    client = connect_to_esp8266(mySocket)
