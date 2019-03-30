@@ -21,7 +21,7 @@ def mixer():
         d2 = request.form.get("Raw Drink No.2")
         d3 = request.form.get("Raw Drink No.3")
         d4 = request.form.get("Raw Drink No.4")
-        msg = "1," + d1 + ",2," + d2 + ",3," + d3+ ",4," + d4 + ",done"
+        msg = "1," + d1 + ".2," + d2 + ".3," + d3+ ".4," + d4 + ".done"
         send_to_esp8266(msg, client)
     return render_template('mixer.html')
 
