@@ -16,18 +16,12 @@ def connect_to_esp8266(mySocket):
     while True:
         print("Waiting for client connection....")
         client, address = mySocket.accept()
-        # msg = client.recv(1024)
         print("New connection from:")
         print("IP: " + address[0])
         print("port: " + str(address[1]))
         print(client)
         # 80:7D:3A:75:E7:A0
-        # if ('192.168.0.19' in address[0]):
-        #if("esp8266" in msg):
-            # print("esp8266 connected")
-            # return client
-        # else:
-        #    continue
+    return clinet
 
 def send_to_esp8266(msg, client):
     try:
@@ -40,3 +34,13 @@ def send_to_esp8266(msg, client):
 if __name__ == "__main__":
     mySocket = listen_port()
     client = connect_to_esp8266(mySocket)
+    while True:
+        try:
+            with open("/log/temp.txt", "r") as f:
+                msg = f.readlines()[0]
+            if(msg != "")
+                send_to_esp8266(msg, client)
+                with open("/log/temp.txt", w) as f:
+                    pass
+        except:
+            continue
