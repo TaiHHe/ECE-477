@@ -14,17 +14,18 @@
 const char* ssid     = STASSID;
 const char* password = STAPSK;
 
-// const char* host = "67.209.189.144";
-const char *host = "192.168.1.100";
+const char* host = "67.209.189.144";
+// const char *host = "192.168.1.100";
 const uint16_t port = 9090;
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
-//  Serial.println();
-//  Serial.println();
-//  Serial.print("Connecting to ");
-//  Serial.println(ssid);\
+  pinMode(LED_BUILTIN, OUTPUT); // Initialize the LED_BUILTIN pin as an output
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
 
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
@@ -32,56 +33,54 @@ void setup() {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
-//    Serial.print(".");
+    Serial.print(".");
   }
-//  Serial.println("");
-//   Serial.println("WiFi connected");
-//  Serial.println("IP address: ");
-//  Serial.println(WiFi.localIP());
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
 }
 
-/*
-void loop() {
-  digitalWrite(LED_BUILTIN, LOW);  // Turn the LED on by making the voltage LOW
-//  Serial.print("Connecting to ");
-//  Serial.print(host);
-//  Serial.print(':');
-//  Serial.println(port);
+void loop()
+{
+  digitalWrite(LED_BUILTIN, LOW); // Turn the LED on by making the voltage LOW
+  Serial.print("Connecting to ");
+  Serial.print(host);
+  Serial.print(':');
+  Serial.println(port);
 
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
-  if(client.connect(host, port)){
-//    Serial.println("Connected to server!");
-//    Serial.println("Receiving from remote server ...");
+  if (client.connect(host, port))
+  {
+    Serial.println("Connected to server!");
+    Serial.println("Receiving from remote server ...");
     String line = client.readStringUntil('\n');
-    if (line != ""){
-//      Serial.println();
-      Serial.println(line);
-//      Serial.println();
-//      Serial.println();
-//      Serial.println("Done!");
+    if (line != "")
+    {
+      Serial.println();
+      Serial.print(line);
+      Serial.println();
+      Serial.println();
+      Serial.println("Done!");
     }
-    else{
-      Serial.print("1,50.2,50.3,100.4,100.done\n");
-    }    
+    else
+    {
+      Serial.println("No message Received.");
+    }
     // Close the connection
-//    Serial.println("Closing connection.");
-//    Serial.println();
+    Serial.println("Closing connection.");
+    Serial.println();
     client.stop();
     delay(5000); // execute once every 5s, don't flood remote service
   }
-  else{
+  else
+  {
     Serial.println("Connection failed.");
     delay(5000);
     return;
   }
 }
-*/
-
-void loop(){
-  Serial.print("1,50.2,50.3,100.4,100.done\n");
-  delay(5000);
-}
-
