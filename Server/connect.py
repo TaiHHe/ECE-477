@@ -21,7 +21,7 @@ class FileEventHandler(FileSystemEventHandler):
         print("Start listening")
         return
 
-    def connect_to_esp8266(self, mySocket):
+    def connect_to_esp8266(self):
         while True:
             print("Waiting for client connection....")
             self.client, self.address = mySocket.accept()
