@@ -2,6 +2,7 @@
 import socket
 from watchdog.observers import Observer
 from watchdog.events import *
+import sys
 import time
 
 class FileEventHandler(FileSystemEventHandler):
@@ -14,8 +15,9 @@ class FileEventHandler(FileSystemEventHandler):
             self.client.send(msg.encode())
             print("message: '" + msg + "' sent")
         except:
-            client.send(b"")
-            print("Empty string sent")
+            # self.client.send(b"")
+            # print("Empty string sent")
+            print("Error detected: ", sys.exc_info()[0])
 
     def on_modified(self, event):
         if event.is_directory:
@@ -23,7 +25,7 @@ class FileEventHandler(FileSystemEventHandler):
         else:
             with open("log/log.txt", "r") as f:
                 msg = f.readlines()[0]
-                send_to_esp8266(self, msg)
+                self.send_to_esp8266(self, msg)
 
 def listen_port():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
