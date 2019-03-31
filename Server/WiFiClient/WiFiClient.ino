@@ -17,10 +17,10 @@ void setup()
 {
   Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT); // Initialize the LED_BUILTIN pin as an output
-  Serial.println();
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
+//  Serial.println();
+//  Serial.println();
+//  Serial.print("Connecting to ");
+//  Serial.println(ssid);
 
   /* Explicitly set the ESP8266 to be a WiFi-client, otherwise, it by default,
      would try to act as both a client and an access-point and could cause
@@ -31,52 +31,52 @@ void setup()
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);
-    Serial.print(".");
+    // Serial.print(".");
   }
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
+  // Serial.println("");
+  // Serial.println("WiFi connected");
+  // Serial.println("IP address: ");
+  // Serial.println(WiFi.localIP());
 }
 
 void loop()
 {
   digitalWrite(LED_BUILTIN, LOW); // Turn the LED on by making the voltage LOW
-  Serial.print("Connecting to ");
-  Serial.print(host);
-  Serial.print(':');
-  Serial.println(port);
+  // Serial.print("Connecting to ");
+  // Serial.print(host);
+  // Serial.print(':');
+  // Serial.println(port);
 
   // Use WiFiClient class to create TCP connections
   WiFiClient client;
   if (client.connect(host, port))
   {
-    Serial.println("Connected to server!");
-    Serial.println("Receiving from remote server ...");
+    // Serial.println("Connected to server!");
+    // Serial.println("Receiving from remote server ...");
     String line = "";
     while (true)
     {
       line = client.readStringUntil('\n');
       if (line != "")
       {
-        Serial.println();
+        // Serial.println();
         Serial.print(line);
-        Serial.println();
-        Serial.println();
-        Serial.println("Done!");
+        // Serial.println();
+        // Serial.println();
+        // Serial.println("Done!");
         break;
       }
       delay(5000);
     }
     // Close the connection
-    Serial.println("Closing connection.");
-    Serial.println();
+    // Serial.println("Closing connection.");
+    // Serial.println();
     client.stop();
     delay(5000); // execute once every 5s, don't flood remote service
   }
   else
   {
-    Serial.println("Connection failed.");
+//    Serial.println("Connection failed.");
     delay(5000);
     return;
   }

@@ -6,9 +6,31 @@ import sys
 import time
 
 class FileEventHandler(FileSystemEventHandler):
-    def __init__(self, client):
+    def __init__(self):
         FileSystemEventHandler.__init__(self)
-        self.client = client
+        self.listen_port()
+        self.connect_to_esp8266()
+
+    def listen_port(self):
+        self.mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        host = "67.209.189.144"
+        port = 9999
+        self.mySocket.bind((host, port))
+        self.mySocket.listen(10)
+        print("Start listening")
+        return
+
+    def connect_to_esp8266(self, mySocket):
+        while True:
+            print("Waiting for client connection....")
+            self.client, self.address = mySocket.accept()
+            print("New connection from:")
+            print("IP: " + self.address[0])
+            print("port: " + str(self.address[1]))
+            # print(client)
+            # 80:7D:3A:75:E7:A0
+            return
 
     def send_to_esp8266(self, msg):
         try:
@@ -27,41 +49,10 @@ class FileEventHandler(FileSystemEventHandler):
                 msg = f.readlines()[0]
                 self.send_to_esp8266(msg)
 
-def listen_port():
-    mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    host = "67.209.189.144"
-    port = 9999
-    mySocket.bind((host, port))
-    mySocket.listen(10)
-    print("Start listening")
-    return mySocket
-
-def connect_to_esp8266(mySocket):
-    while True:
-        print("Waiting for client connection....")
-        client, address = mySocket.accept()
-        print("New connection from:")
-        print("IP: " + address[0])
-        print("port: " + str(address[1]))
-        # print(client)
-        # 80:7D:3A:75:E7:A0
-        return client
-
-def send_to_esp8266(client, msg):
-    try:
-        client.send(msg.encode())
-        print("message: '" + msg + "' sent")
-    except:
-        client.send(b"")
-        print("Empty string sent")
-
 
 if __name__ == "__main__":
-    mySocket = listen_port()
-    client = connect_to_esp8266(mySocket)
     observer = Observer()
-    event_handler = FileEventHandler(client)
+    event_handler = FileEventHandler()
     observer.schedule(event_handler,"/root/ECE-477/Server/log",True)
     observer.start()
     try:
