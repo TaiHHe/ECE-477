@@ -18,7 +18,7 @@ def mixer():
         d3 = request.form.get("Raw Drink No.3")
         d4 = request.form.get("Raw Drink No.4")
         msg = "1," + d1 + ".2," + d2 + ".3," + d3+ ".4," + d4 + ".done"
-        with open("log.txt", "w") as f:
+        with open("log/log.txt", "w") as f:
             f.write(msg)
     return render_template('mixer.html')
 

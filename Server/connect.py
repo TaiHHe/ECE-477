@@ -34,13 +34,13 @@ def send_to_esp8266(msg, client):
 if __name__ == "__main__":
     mySocket = listen_port()
     client = connect_to_esp8266(mySocket)
-    while True:
-        try:
-            with open("log.txt", "r") as f:
-                msg = f.readlines()[0]
-            if(msg != ""):
-                send_to_esp8266(msg, client)
-                with open("log.txt", "w") as f:
-                    pass
-        except:
-            continue
+#    while True:
+#        try:
+#            with open("log.txt", "r") as f:
+#                msg = f.readlines()[0]
+#            if(msg != ""):
+#                send_to_esp8266(msg, client)
+#                with open("log.txt", "w") as f:
+#                    pass
+#        except:
+#            continue
