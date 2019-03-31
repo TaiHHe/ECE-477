@@ -10,6 +10,7 @@ class FileEventHandler(FileSystemEventHandler):
         FileSystemEventHandler.__init__(self)
         self.listen_port()
         self.connect_to_esp8266()
+        print("init here")
 
     def listen_port(self):
         self.mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -48,6 +49,8 @@ class FileEventHandler(FileSystemEventHandler):
             with open("log/log.txt", "r") as f:
                 msg = f.readlines()[0]
                 self.send_to_esp8266(msg)
+                self.listen_port()
+                self.connect_to_esp8266()
 
 
 if __name__ == "__main__":
