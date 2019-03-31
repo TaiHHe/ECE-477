@@ -1,10 +1,34 @@
 #!/usr/bin/env python3
 import socket
+from watchdog.observers import Observer
+from watchdog.events import *
+import time
+
+class FileEventHandler(FileSystemEventHandler):
+    def __init__(self, client):
+        FileSystemEventHandler.__init__(self)
+        self.client = client
+
+    def send_to_esp8266(self, msg):
+        try:
+            self.client.send(msg.encode())
+            print("message: '" + msg + "' sent")
+        except:
+            client.send(b"")
+            print("Empty string sent")
+
+    def on_modified(self, event):
+        if event.is_directory:
+            pass
+        else:
+            with open("log/log.txt", "r") as f:
+                msg = f.readlines()
+                # send_to_esp8266(self, msg)
+                print(msg)
 
 def listen_port():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     mySocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    # host = socket.gethostname()
     host = "67.209.189.144"
     port = 9999
     mySocket.bind((host, port))
@@ -23,7 +47,7 @@ def connect_to_esp8266(mySocket):
         # 80:7D:3A:75:E7:A0
     return clinet
 
-def send_to_esp8266(msg, client):
+def send_to_esp8266(client, msg):
     try:
         client.send(msg.encode())
         print("message: '" + msg + "' sent")
@@ -31,16 +55,17 @@ def send_to_esp8266(msg, client):
         client.send(b"")
         print("Empty string sent")
 
+
 if __name__ == "__main__":
     mySocket = listen_port()
     client = connect_to_esp8266(mySocket)
-#    while True:
-#        try:
-#            with open("log.txt", "r") as f:
-#                msg = f.readlines()[0]
-#            if(msg != ""):
-#                send_to_esp8266(msg, client)
-#                with open("log.txt", "w") as f:
-#                    pass
-#        except:
-#            continue
+    observer = Observer()
+    event_handler = FileEventHandler()
+    observer.schedule(event_handler,"D:\OneDrive\Files\Academy\Spring2019\ECE477\ECE-477\Server\log",True)
+    observer.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
