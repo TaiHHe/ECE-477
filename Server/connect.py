@@ -13,7 +13,7 @@ class FileEventHandler(FileSystemEventHandler):
     def send_to_esp8266(self, msg):
         try:
             self.client.send(msg.encode())
-            print("message: '" + msg + "' sent")
+            print("message: '" + msg.strip() + "' sent")
         except:
             # self.client.send(b"")
             # print("Empty string sent")
