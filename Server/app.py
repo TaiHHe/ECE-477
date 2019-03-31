@@ -17,7 +17,7 @@ def mixer():
         d2 = request.form.get("Raw Drink No.2")
         d3 = request.form.get("Raw Drink No.3")
         d4 = request.form.get("Raw Drink No.4")
-        msg = "1," + d1 + ".2," + d2 + ".3," + d3+ ".4," + d4 + ".done"
+        msg = "1," + d1 + ".2," + d2 + ".3," + d3+ ".4," + d4 + ".done\n"
         with open("/root/ECE-477/Server/log/log.txt", "w") as f:
             f.write(msg)
     return render_template('mixer.html')
