@@ -45,7 +45,7 @@ def connect_to_esp8266(mySocket):
         print("port: " + str(address[1]))
         # print(client)
         # 80:7D:3A:75:E7:A0
-        return clinet
+        return client
 
 def send_to_esp8266(client, msg):
     try:
