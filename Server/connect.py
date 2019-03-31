@@ -60,7 +60,7 @@ if __name__ == "__main__":
     mySocket = listen_port()
     client = connect_to_esp8266(mySocket)
     observer = Observer()
-    event_handler = FileEventHandler()
+    event_handler = FileEventHandler(client)
     observer.schedule(event_handler,"/root/ECE-477/Server/log",True)
     observer.start()
     try:
