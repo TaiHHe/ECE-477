@@ -25,7 +25,7 @@ class FileEventHandler(FileSystemEventHandler):
         else:
             with open("log/log.txt", "r") as f:
                 msg = f.readlines()[0]
-                self.send_to_esp8266(self, msg)
+                self.send_to_esp8266(msg)
 
 def listen_port():
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
