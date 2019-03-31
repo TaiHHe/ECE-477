@@ -1,22 +1,17 @@
-/*
-    This sketch establishes a TCP connection to a "quote of the day" service.
-    It sends a "hello" message, and then prints received data.
-*/
-
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 
 #ifndef STASSID
 #define STASSID "XMIXERMAX"
-#define STAPSK  "Team19@ECE477"
+#define STAPSK "Team19@ECE477"
 #endif
 
-const char* ssid     = STASSID;
-const char* password = STAPSK;
+const char *ssid = STASSID;
+const char *password = STAPSK;
 
-const char* host = "67.209.189.144";
-// const char *host = "192.168.1.100";
-const uint16_t port = 9090;
+//const char* host = "192.168.0.100";
+const char *host = "67.209.189.144";
+const uint16_t port = 9999;
 
 void setup()
 {
@@ -58,18 +53,20 @@ void loop()
   {
     Serial.println("Connected to server!");
     Serial.println("Receiving from remote server ...");
-    String line = client.readStringUntil('\n');
-    if (line != "")
+    String line = "";
+    while (true)
     {
-      Serial.println();
-      Serial.print(line);
-      Serial.println();
-      Serial.println();
-      Serial.println("Done!");
-    }
-    else
-    {
-      Serial.println("No message Received.");
+      line = client.readStringUntil('\n');
+      if (line != "")
+      {
+        Serial.println();
+        Serial.print(line);
+        Serial.println();
+        Serial.println();
+        Serial.println("Done!");
+        break;
+      }
+      delay(5000);
     }
     // Close the connection
     Serial.println("Closing connection.");

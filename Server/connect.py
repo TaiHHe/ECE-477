@@ -43,9 +43,9 @@ def connect_to_esp8266(mySocket):
         print("New connection from:")
         print("IP: " + address[0])
         print("port: " + str(address[1]))
-        print(client)
+        # print(client)
         # 80:7D:3A:75:E7:A0
-    return clinet
+        return clinet
 
 def send_to_esp8266(client, msg):
     try:
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     client = connect_to_esp8266(mySocket)
     observer = Observer()
     event_handler = FileEventHandler()
-    observer.schedule(event_handler,"D:\OneDrive\Files\Academy\Spring2019\ECE477\ECE-477\Server\log",True)
+    observer.schedule(event_handler,"/root/ECE-477/Server/log",True)
     observer.start()
     try:
         while True:
