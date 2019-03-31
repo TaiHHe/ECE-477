@@ -24,7 +24,7 @@ class FileEventHandler(FileSystemEventHandler):
     def connect_to_esp8266(self):
         while True:
             print("Waiting for client connection....")
-            self.client, self.address = mySocket.accept()
+            self.client, self.address = self.mySocket.accept()
             print("New connection from:")
             print("IP: " + self.address[0])
             print("port: " + str(self.address[1]))
