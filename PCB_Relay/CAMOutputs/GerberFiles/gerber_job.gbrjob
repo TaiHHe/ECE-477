@@ -1,7 +1,7 @@
 {
     "Header": {
         "Comment": "All values are metric (mm)",
-        "CreationDate": "2019-03-28T05:33:53Z",
+        "CreationDate": "2019-03-28T14:31:47Z",
         "GenerationSoftware": {
             "Application": "EAGLE",
             "Vendor": "Autodesk",
@@ -13,12 +13,12 @@
         "BoardThickness": 1.57,
         "LayerNumber": 2,
         "Name": {
-            "ProjectId": "477"
+            "ProjectId": "Nowboard"
         },
         "Owner": "Taihai He <he431@purdue.edu>",
         "Size": {
-            "X": 69.52,
-            "Y": 48.25
+            "X": 102.54,
+            "Y": 82.54
         }
     }
 }
