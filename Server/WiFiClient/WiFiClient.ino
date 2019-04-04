@@ -66,7 +66,7 @@ void loop()
         // Serial.println("Done!");
         break;
       }
-      delay(5000);
+      delay(1000);
     }
     // Close the connection
     // Serial.println("Closing connection.");
