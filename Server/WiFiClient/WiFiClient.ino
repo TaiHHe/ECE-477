@@ -2,8 +2,10 @@
 #include <ESP8266HTTPClient.h>
 
 #ifndef STASSID
-#define STASSID "XMIXERMAX"
-#define STAPSK "Team19@ECE477"
+#define STASSID "Vince"
+#define STAPSK "19970920"
+//#define STASSID "XMIXERMAX"
+//#define STAPSK "Team19@ECE477"
 #endif
 
 const char *ssid = STASSID;
@@ -72,7 +74,7 @@ void loop()
     // Serial.println("Closing connection.");
     // Serial.println();
     client.stop();
-    delay(5000); // execute once every 5s, don't flood remote service
+    delay(1000); // execute once every 1s, don't flood remote service
   }
   else
   {
