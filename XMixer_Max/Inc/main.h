@@ -112,9 +112,12 @@ void Error_Handler(void);
 #define STATUS_READY 3
 #define STATUS_ERROR 4
 
-#define SPEED 0.0075
+#define SPEED1 0.0057
+#define SPEED2 0.00435
+#define SPEED3 0.00464
+#define SPEED4 0.004
 
-#define WEIGHT 5000
+#define WEIGHT 3600
 
 /* USER CODE END Private defines */
 

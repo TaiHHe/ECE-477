@@ -80,6 +80,12 @@ extern int timeout;
 extern int status;
 extern int overflow;
 extern int tim;
+int ADCbuffer[14];
+int ADCbuffer2[14];
+int idx;
+int flag;
+int temp;
+int sum;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -227,21 +233,51 @@ void TIM2_IRQHandler(void)
 	//TIM2 interruption is configured to happen every 1ms
 	TIM2 -> SR &= 0xFFFFFFFE;
 	count++;
+	read = 0;
 
 	if (status == STATUS_INIT) {
+		idx = 0;
+		flag = 0;
 		if ((timeout == 0) && (count >= 3000)) { //30s
 			timeout = 1;
 		} else if (timeout == 1) {
 			count = 0;
 		}
 	} else if (status == STATUS_READY) {
+		idx = 0;
 		count = 0;
+		flag = 0;
 	} else if (status == STATUS_MIXING) {
 		//Check ADC value, change the value of overflow to 1 if needed, and then break
 		ADC1 -> CR2 |= ADC_CR2_SWSTART;
 		while((ADC1 -> SR & ADC_SR_EOC) == 0);
-		read = ADC1 -> DR;
-		if (read > WEIGHT) {
+		ADCbuffer[idx] = ADC1 -> DR;
+		if (idx > 12) {
+			flag = 1;
+			idx = 0;
+		} else {
+			idx++;
+		}
+		sum = 0;
+		if ((flag && !overflow)) {
+			for (int i = 0; i < 14; i++) {
+				ADCbuffer2[i] = ADCbuffer[i];
+			}
+			for (int i = 0; i < 13; i++) {
+				for (int m = i + 1; m < 14; m++) {
+					if (ADCbuffer2[i] < ADCbuffer2[m]) {
+						temp = ADCbuffer2[i];
+						ADCbuffer2[i] = ADCbuffer2[m];
+						ADCbuffer2[m] = temp;
+					}
+				}
+			}
+			for (int i = 2; i < 12; i++) {
+				sum += ADCbuffer2[i];
+			}
+			sum /= 10;
+		}
+		if (sum > WEIGHT) {
 			count = 0;
 			overflow = 1;
 		} else if (count >= tim) {

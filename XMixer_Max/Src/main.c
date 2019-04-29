@@ -118,6 +118,7 @@ static void MX_ADC1_Init(void);
 void Drink_Transfer(int sol, int time);
 void Timer_Enable();
 void Timer_Disable();
+void System_Test();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -141,6 +142,8 @@ int main(void)
 	int Time2;
 	int Time3;
 	int Time4;
+
+	int offlag;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -179,7 +182,7 @@ int main(void)
   lcd_send_cmd(0xc0);
   lcd_send_string("using XMixer Max");
   HAL_GPIO_WritePin(LED_Power_GPIO_Port, LED_Power_Pin, GPIO_PIN_SET);
-  HAL_Delay(5000);
+  HAL_Delay(4000);
   lcd_send_cmd(0x01);
   lcd_send_cmd(0x02);
   lcd_send_string("plTrying to con");
@@ -188,6 +191,14 @@ int main(void)
   HAL_UART_Receive_IT(&huart2, &pData, 1);
   HAL_UART_Transmit(&huart2, initMsg, sizeof(initMsg), 100);
   ADC1 -> CR2 |= ADC_CR2_ADON;
+  HAL_GPIO_WritePin(LED_Error_GPIO_Port, LED_Error_Pin, GPIO_PIN_RESET);
+
+  HAL_Delay(4000);
+  lcd_send_cmd(0x01);
+  lcd_send_cmd(0x02);
+  lcd_send_string("plPlease select");
+  lcd_send_cmd(0xc0);
+  lcd_send_string("drinks!");
   /*do {
 	  if ((LF == 1) && (timeout == 0)) {
 		  //Keep trying as long as 30 seconds have not passed since last restart.
@@ -247,7 +258,9 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  //Check if any information is received.
+	  HAL_GPIO_WritePin(LED_Error_GPIO_Port, LED_Error_Pin, GPIO_PIN_RESET);
 	  if (LF == 1) {
+		  offlag = 0;
 		  LF = 0;
 		  i = 0;
 		  if ((buffer[0] == 49) || (buffer[0] == 10)) { // /n or 1
@@ -263,7 +276,7 @@ int main(void)
 		  	  	  		  numBufIdx += 1;
 		  	  	  		  CurIdx += 1;
 		  	  	  	  }
-		  	  	  	  numBuffer[numBufIdx + 1] = 0;
+		  	  	  	  numBuffer[numBufIdx] = 0;
 		  	  	  	  if (VolDel == 0) {
 		  	  	  		  Vol1 = atoi(numBuffer);
 		  	  	  		  //HAL_UART_Transmit(&huart3, vol1Msg, sizeof(vol1Msg), 100);
@@ -290,7 +303,7 @@ int main(void)
 			  lcd_send_cmd(0xc0);
 			  lcd_send_string("Mixing");
 			  status = STATUS_READY;
-			  HAL_UART_Transmit(&huart2, startMsg, sizeof(startMsg), 100);
+			  //HAL_UART_Transmit(&huart3,h		ccc startMsg, sizeof(startMsg), 100);
 		  }
 		  //For now, assume no other information would be received, and the process would not be interrupted.
 		  else {
@@ -300,14 +313,34 @@ int main(void)
 		  i = 0;
 		  HAL_UART_Receive_IT(&huart2, &pData, 1);
 	  }
+//	  Vol1 = 20;
+//	  Vol2 = 20;
+//	  Vol3 = 20;
+//	  Vol4 = 20;
+//	  System_Test();
 
 	  if (status == STATUS_READY) {
+//		  if ((Vol1 + Vol2 + Vol3 + Vol4) > 300) {
+//			  offlag = 1;
+//			  Vol1 = (Vol1 > 300) ? 300: Vol1;
+//			  Vol2 = ((Vol1 + Vol2) > 300) ? (300 - Vol1) : Vol2;
+//			  Vol3 = ((Vol1 + Vol2 + Vol3) > 300) ? (300 - Vol1 - Vol2) : Vol3;
+//			  Vol4 = 300 - Vol1 - Vol2 - Vol3;
+//		  }
+//		  Vol1 = (Vol1 - 10) * 2;
+//		  Vol2 = (Vol2 - 10) * 2;
+//		  Vol3 = (Vol3 - 10) * 2;
+//		  Vol3 = (Vol4 - 10) * 2;
+//		  Vol1 *= 1.15;
+//		  Vol2 *= 1.15;
+//		  Vol3 *= 1.15;
+//		  Vol3 *= 1.15;
 		  //Start mixing, need to calculate the time with the speed 7.5 ml/s
 		  Timer_Enable();
-		  Time1 = Vol1/SPEED;
-		  Time2 = Vol2/SPEED;
-		  Time3 = Vol3/SPEED;
-		  Time4 = Vol4/SPEED;
+		  Time1 = Vol1/SPEED1;
+		  Time2 = Vol2/SPEED2;
+		  Time3 = Vol3/SPEED3;
+		  Time4 = Vol4/SPEED4;
 		  HAL_GPIO_WritePin(LED_Working_GPIO_Port, LED_Working_Pin, GPIO_PIN_SET);
 		  HAL_GPIO_WritePin(Relay_Power_GPIO_Port, Relay_Power_Pin, GPIO_PIN_SET); //Turn on the relay
 		  HAL_GPIO_WritePin(Pump_Power_GPIO_Port, Pump_Power_Pin, GPIO_PIN_SET); //Turn on the pump, as PC10 in the pump test
@@ -329,7 +362,7 @@ int main(void)
 
 		  //Update LED, LCD and the web site
 		  HAL_GPIO_WritePin(LED_Working_GPIO_Port, LED_Working_Pin, GPIO_PIN_RESET);
-		  if (!overflow) {
+		  if (!overflow && !offlag) {
 			  lcd_send_cmd(0x01);
 			  lcd_send_cmd(0x02);
 			  lcd_send_string("plOrder");
@@ -337,6 +370,7 @@ int main(void)
 			  lcd_send_string("completed!");
 			  HAL_UART_Transmit(&huart2, doneMsg, sizeof(doneMsg), 100);
 		  } else {
+			  HAL_GPIO_WritePin(LED_Error_GPIO_Port, LED_Error_Pin, GPIO_PIN_SET);
 			  lcd_send_cmd(0x01);
 			  lcd_send_cmd(0x02);
 			  lcd_send_string("plAlmost full!");
@@ -345,7 +379,19 @@ int main(void)
 			  HAL_UART_Transmit(&huart2, ofMsg, sizeof(ofMsg), 100);
 			  overflow = 0;
 		  }
+		  Vol1 = 0;
+		  Vol2 = 0;
+		  Vol3 = 0;
+		  Vol4 = 0;
+		  offlag = 0;
 		  Timer_Disable();
+		  HAL_Delay(10000);
+		  lcd_send_cmd(0x01);
+		  lcd_send_cmd(0x02);
+		  lcd_send_string("plPlease select");
+		  lcd_send_cmd(0xc0);
+		  lcd_send_string("drinks!");
+		  HAL_Delay(3000);
 	  }
   }
   /* USER CODE END 3 */
@@ -366,14 +412,10 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /**Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLM = 4;
-  RCC_OscInitStruct.PLL.PLLN = 168;
-  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLQ = 4;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -382,12 +424,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -413,7 +455,7 @@ static void MX_ADC1_Init(void)
   /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
   */
   hadc1.Instance = ADC1;
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
   hadc1.Init.ScanConvMode = DISABLE;
   hadc1.Init.ContinuousConvMode = DISABLE;
@@ -496,7 +538,7 @@ static void MX_TIM2_Init(void)
 
   /* USER CODE END TIM2_Init 1 */
   htim2.Instance = TIM2;
-  htim2.Init.Prescaler = 41999;
+  htim2.Init.Prescaler = 7999;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim2.Init.Period = 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -688,6 +730,7 @@ void Drink_Transfer(int sol, int time) {
 	}
 
 	tim = time;
+	timeout = 0;
 	HAL_GPIO_WritePin(port, pin, GPIO_PIN_SET); //Open solenoid
 	status = STATUS_MIXING;
 	while (timeout == 0) {
@@ -695,19 +738,30 @@ void Drink_Transfer(int sol, int time) {
 			break;
 		}
 	}
-	timeout = 0;
 	HAL_GPIO_WritePin(port, pin, GPIO_PIN_RESET); //Close solenoid
 	HAL_Delay(1000); //Wait for a little bit: 1.5s
-	HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_SET); //Open solenoid Air
-	HAL_Delay(3000);
-	HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_RESET); //Open solenoid Air
+	if (time != 0) {
+		HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_SET); //Open solenoid Air
+		HAL_Delay(3000);
+		HAL_GPIO_WritePin(Solenoid_Air_GPIO_Port, Solenoid_Air_Pin, GPIO_PIN_RESET); //Open solenoid Air
+	}
 	status = STATUS_READY;
 	HAL_Delay(1000); //Wait for a little bit: 1.5s
 }
 
+void System_Test() {
+	HAL_Delay(3000);
+	lcd_send_cmd(0x01);
+	lcd_send_cmd(0x02);
+	lcd_send_string("plOrder received");
+	lcd_send_cmd(0xc0);
+	lcd_send_string("Mixing");
+	status = STATUS_READY;
+}
+
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	if (pData == '\n') {
+	if (pData == 33) {//!
 		i--;
 		LF = 1;
 	} else {
